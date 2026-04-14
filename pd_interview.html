@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Designer Interview Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --red: #E8001B; --red-light: #fff0f2;
+    --ink: #1a1a1a; --ink2: #444; --ink3: #888; --ink4: #bbb;
+    --surface: #ffffff; --bg: #f4f3f0;
+    --border: rgba(0,0,0,0.1); --border-strong: rgba(0,0,0,0.18);
+    --radius: 10px;
+    --green-bg: #edf7f0; --green-text: #1a7a3c; --green-border: #6ec98a;
+    --amber-bg: #fdf4e3; --amber-text: #7a4a00; --amber-border: #e8a825;
+    --reject-bg: #fff0f2; --reject-text: #b5001a; --reject-border: #E8001B;
+  }
+  html { font-size: 16px; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; line-height: 1.6; }
+
+  /* MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+  .modal-overlay.hidden { display: none; }
+  .modal-box { background: var(--surface); border-radius: 14px; padding: 2rem; width: 400px; max-width: 90vw; }
+  .modal-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
+  .modal-title { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--ink3); margin-bottom: 1.5rem; line-height: 1.5; }
+  .modal-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .modal-input { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 15px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px 14px; outline: none; color: var(--ink); margin-bottom: 1rem; transition: border-color 0.2s; }
+  .modal-input:focus { border-color: var(--red); }
+  .modal-btn { width: 100%; padding: 11px; border-radius: 8px; border: none; background: var(--red); color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .modal-btn:hover { background: #c5001a; }
+  .modal-room-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1.25rem; }
+  .modal-room-code { flex: 1; font-family: 'DM Mono', monospace; font-size: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; color: var(--ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .modal-copy-btn { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-strong); background: transparent; font-size: 12px; cursor: pointer; color: var(--ink2); font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .modal-copy-btn:hover { background: var(--bg); }
+
+  /* TOPBAR */
+  .topbar { position: sticky; top: 0; z-index: 100; background: var(--ink); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; height: 52px; border-bottom: 2px solid var(--red); }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; }
+  .topbar-logo { width: 28px; height: 28px; }
+  .topbar-title { font-size: 13px; font-weight: 500; color: #fff; letter-spacing: 0.04em; text-transform: uppercase; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .conn-badge { display: flex; align-items: center; gap: 5px; font-size: 11px; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.35); padding: 4px 8px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.08); }
+  .conn-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #888; }
+  .conn-badge.online .dot { background: #6ec98a; }
+  .conn-badge.online { color: rgba(255,255,255,0.6); }
+
+  /* AVATARS */
+  .presence-row { display: flex; align-items: center; gap: 3px; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: #fff; border: 2px solid var(--ink); flex-shrink: 0; position: relative; cursor: default; }
+  .avatar.self { border-color: var(--red); }
+  .avatar-tip { position: absolute; bottom: -26px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 3px 7px; border-radius: 4px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s; font-family: 'DM Mono', monospace; z-index: 999; }
+  .avatar:hover .avatar-tip { opacity: 1; }
+
+  /* BUTTONS */
+  .topbar-btn { display: flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.7); transition: all 0.15s; }
+  .topbar-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+  .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #6ec98a; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+  .save-toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--ink); color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 8px; border-left: 3px solid var(--red); opacity: 0; transform: translateY(8px); transition: opacity 0.2s, transform 0.2s; pointer-events: none; z-index: 9999; }
+  .save-toast.show { opacity: 1; transform: translateY(0); }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 52px); }
+  .sidebar { background: var(--ink); padding: 1.5rem 0; position: sticky; top: 52px; height: calc(100vh - 52px); overflow-y: auto; }
+  .sidebar-nav { list-style: none; }
+  .sidebar-nav li a { display: block; padding: 7px 1.5rem; font-size: 12px; color: rgba(255,255,255,0.45); text-decoration: none; letter-spacing: 0.02em; transition: color 0.15s, background 0.15s; border-left: 2px solid transparent; }
+  .sidebar-nav li a:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+  .sidebar-nav li a.active { color: #fff; border-left-color: var(--red); background: rgba(232,0,27,0.08); }
+  .sidebar-section-label { font-size: 10px; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.2); letter-spacing: 0.1em; text-transform: uppercase; padding: 1.25rem 1.5rem 0.4rem; }
+  .sidebar-divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 0.75rem 1.5rem; }
+  .main { padding: 2rem 2.5rem 4rem; max-width: 820px; }
+
+  /* CANDIDATE */
+  .candidate-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 2rem; flex-wrap: wrap; }
+  .candidate-left { flex: 1; min-width: 220px; }
+  .field-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  .candidate-name-input { font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 500; color: var(--ink); border: none; border-bottom: 1.5px solid var(--border-strong); background: transparent; outline: none; width: 100%; padding-bottom: 4px; transition: border-color 0.2s; }
+  .candidate-name-input::placeholder { color: var(--ink4); font-weight: 300; }
+  .candidate-name-input:focus { border-bottom-color: var(--red); }
+  .candidate-right { display: flex; flex-direction: column; gap: 8px; }
+  .outcome-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; }
+  .outcome-buttons { display: flex; gap: 8px; }
+  .outcome-btn { padding: 7px 16px; border-radius: 6px; border: 1px solid var(--border-strong); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; background: transparent; color: var(--ink2); transition: all 0.15s; }
+  .outcome-btn:hover { background: var(--bg); }
+  .outcome-btn.forward { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); font-weight: 500; }
+  .outcome-btn.reject { background: var(--reject-bg); color: var(--reject-text); border-color: var(--reject-border); font-weight: 500; }
+
+  /* SECTIONS */
+  .section-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; scroll-margin-top: 70px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; cursor: pointer; user-select: none; gap: 1rem; transition: background 0.15s; }
+  .section-header:hover { background: #fafaf9; }
+  .section-header-left { display: flex; align-items: center; gap: 12px; }
+  .section-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--red); min-width: 18px; }
+  .section-name { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .section-dur { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--ink4); background: var(--bg); padding: 2px 8px; border-radius: 4px; }
+  .section-chevron { font-size: 10px; color: var(--ink4); transition: transform 0.2s; flex-shrink: 0; }
+  .section-chevron.open { transform: rotate(180deg); }
+  .section-body { display: none; border-top: 1px solid var(--border); padding: 1.25rem; }
+  .section-body.open { display: block; }
+  .purpose-pill { display: inline-block; font-size: 11px; color: var(--ink3); background: var(--bg); border-radius: 4px; padding: 3px 10px; margin-bottom: 1.1rem; font-family: 'DM Mono', monospace; }
+  .q-block { margin-bottom: 1.1rem; }
+  .q-block:last-child { margin-bottom: 0; }
+  .q-text { font-size: 14px; color: var(--ink); margin-bottom: 5px; line-height: 1.55; }
+  .q-listen { font-size: 11px; color: var(--ink3); margin-bottom: 7px; font-style: italic; }
+  .q-listen strong { color: var(--ink3); font-weight: 500; font-style: normal; }
+  .q-notes { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; background: var(--bg); outline: none; resize: vertical; min-height: 58px; line-height: 1.5; transition: border-color 0.15s, background 0.15s; }
+  .q-notes:focus { border-color: rgba(232,0,27,0.4); background: #fff; }
+  .q-notes::placeholder { color: var(--ink4); }
+  .q-divider { border: none; border-top: 1px solid var(--border); margin: 1.1rem 0; }
+
+  /* BEHAVIOUR */
+  .behaviour-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-top: 0.25rem; }
+  .behaviour-item { background: var(--bg); border-radius: 6px; padding: 10px 12px; }
+  .behaviour-title { font-size: 12px; font-weight: 500; color: var(--ink); margin-bottom: 7px; border-bottom: 1.5px solid var(--border); padding-bottom: 5px; }
+  .behaviour-point { font-size: 11px; color: var(--ink2); margin-bottom: 3px; line-height: 1.4; }
+
+  /* MY SCORECARD */
+  .scorecard-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; scroll-margin-top: 70px; }
+  .scorecard-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .scorecard-header-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .scorecard-mine-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--ink3); background: var(--bg); padding: 3px 10px; border-radius: 4px; }
+  .scorecard-body { padding: 1.25rem; }
+  .score-area-row { display: grid; grid-template-columns: 1fr auto 180px; align-items: start; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .score-area-row:last-of-type { border-bottom: none; }
+  .score-area-name { font-size: 13px; color: var(--ink); padding-top: 4px; }
+  .score-stars { display: flex; gap: 4px; }
+  .star-btn { width: 28px; height: 28px; border-radius: 5px; border: 1px solid var(--border-strong); cursor: pointer; background: transparent; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink3); transition: all 0.1s; display: flex; align-items: center; justify-content: center; }
+  .star-btn:hover { background: var(--bg); color: var(--ink); }
+  .star-btn.on { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); font-weight: 500; }
+  .score-area-notes { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--ink); border: 1px solid var(--border); border-radius: 5px; padding: 5px 8px; background: var(--bg); outline: none; resize: vertical; min-height: 36px; line-height: 1.45; transition: border-color 0.15s; }
+  .score-area-notes:focus { border-color: rgba(232,0,27,0.35); background: #fff; }
+  .score-area-notes::placeholder { color: var(--ink4); }
+  .score-total-row { display: flex; align-items: center; gap: 16px; padding: 14px 0 4px; border-top: 2px solid var(--border); margin-top: 4px; }
+  .total-num { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: var(--ink); min-width: 36px; }
+  .total-denom { font-size: 13px; color: var(--ink3); }
+  .progress-outer { flex: 1; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress-inner { height: 100%; background: var(--red); border-radius: 99px; width: 0%; transition: width 0.3s ease; }
+  .rec-section { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+  .rec-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; display: block; }
+  .rec-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.1rem; }
+  .rec-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border-strong); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; background: transparent; color: var(--ink2); transition: all 0.15s; }
+  .rec-btn:hover { background: var(--bg); }
+  .rec-btn.sel-sy { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); font-weight: 500; }
+  .rec-btn.sel-y  { background: #e8f5e8; color: #1e6b2e; border-color: #8ac98a; font-weight: 500; }
+  .rec-btn.sel-ly { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); font-weight: 500; }
+  .rec-btn.sel-ln { background: #fff3ec; color: #8a3a00; border-color: #e07a3a; font-weight: 500; }
+  .rec-btn.sel-n  { background: var(--reject-bg); color: var(--reject-text); border-color: var(--reject-border); font-weight: 500; }
+
+  /* PEER EDITING */
+  .peer-edit-label { font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 8px 3px; border-radius: 0 0 4px 4px; color: #fff; display: none; margin-top: -2px; }
+  .q-notes.peer-editing { border-color: var(--peer-color) !important; background: #fff !important; }
+  .candidate-name-input.peer-editing { border-bottom-color: var(--peer-color) !important; }
+
+  .summary-textarea { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; background: var(--bg); outline: none; resize: vertical; min-height: 88px; line-height: 1.55; transition: border-color 0.15s, background 0.15s; }
+  .summary-textarea:focus { border-color: rgba(232,0,27,0.4); background: #fff; }
+  .summary-textarea::placeholder { color: var(--ink4); }
+
+  /* COMBINED SCORECARD */
+  .combined-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; overflow: hidden; scroll-margin-top: 70px; }
+  .combined-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: #fafaf9; }
+  .combined-title { font-size: 14px; font-weight: 500; color: var(--ink); }
+  .combined-subtitle { font-size: 11px; color: var(--ink3); font-family: 'DM Mono', monospace; }
+  .combined-body { padding: 1.25rem; }
+  .combined-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .combined-row:last-of-type { border-bottom: none; }
+  .combined-name { font-size: 13px; color: var(--ink2); flex: 1; }
+  .combined-bar-wrap { flex: 2; height: 6px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+  .combined-bar { height: 100%; border-radius: 99px; background: var(--red); transition: width 0.4s ease; width: 0; }
+  .combined-val { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--ink); min-width: 32px; text-align: right; }
+  .combined-total-row { display: flex; align-items: center; gap: 16px; padding: 14px 0 0; border-top: 2px solid var(--border); margin-top: 8px; }
+  .combined-total-num { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: var(--ink); }
+  .combined-total-label { font-size: 13px; color: var(--ink3); }
+  .reviewer-scores-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+  .reviewer-chip { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+  .reviewer-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .reviewer-name-chip { font-size: 12px; color: var(--ink2); }
+  .reviewer-score-chip { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink); font-weight: 500; margin-left: 4px; }
+  .rec-combined-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.75rem; }
+  .rec-combined-item { font-size: 12px; padding: 5px 12px; border-radius: 5px; border: 1px solid var(--border); background: var(--bg); color: var(--ink2); }
+
+  @media (max-width: 680px) {
+    .layout { grid-template-columns: 1fr; } .sidebar { display: none; }
+    .main { padding: 1rem 1rem 3rem; } .score-area-row { grid-template-columns: 1fr; }
+    .candidate-card { flex-direction: column; gap: 1rem; } .topbar-title { display: none; }
+  }
+  @media print {
+    .topbar, .sidebar, .modal-overlay { display: none !important; }
+    .layout { display: block; } .main { padding: 1rem; max-width: 100%; }
+    .section-body { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="joinModal">
+  <div class="modal-box">
+    <div class="modal-logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="4" fill="#E8001B"/><path d="M14 6L20 10V14C20 17.5 17.5 20.5 14 22C10.5 20.5 8 17.5 8 14V10L14 6Z" fill="white"/></svg>
+      <span style="font-size:13px;font-weight:500;color:var(--ink2);letter-spacing:0.04em;text-transform:uppercase;">Product Designer Interview</span>
+    </div>
+    <div class="modal-title">Join this session</div>
+    <div class="modal-sub">Enter your name so your panel colleagues can see who's reviewing. Notes sync in real time across all reviewers.</div>
+    <span class="modal-label">Your name</span>
+    <input class="modal-input" id="userNameInput" type="text" placeholder="e.g. Jack" autocomplete="off" maxlength="32" />
+    <span class="modal-label">Share this link with your panel</span>
+    <div class="modal-room-row">
+      <div class="modal-room-code" id="roomCodeDisplay"></div>
+      <button class="modal-copy-btn" onclick="copyLink()">Copy</button>
+    </div>
+    <button class="modal-btn" onclick="joinSession()">Join session</button>
+  </div>
+</div>
+
+<div class="save-toast" id="saveToast"></div>
+
+<nav class="topbar">
+  <div class="topbar-brand">
+    <svg class="topbar-logo" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="4" fill="#E8001B"/><path d="M14 6L20 10V14C20 17.5 17.5 20.5 14 22C10.5 20.5 8 17.5 8 14V10L14 6Z" fill="white"/></svg>
+    <span class="topbar-title">Product Designer — Interview Guide</span>
+  </div>
+  <div class="topbar-right">
+    <div class="conn-badge" id="connBadge"><div class="dot"></div><span id="connText">Offline</span></div>
+    <div class="presence-row" id="presenceRow"></div>
+    <button class="topbar-btn" onclick="copyLink()"><div class="live-dot"></div>Share link</button>
+    <button class="topbar-btn" onclick="saveToFile()">Save file</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section-label">Interview</div>
+    <ul class="sidebar-nav" id="sidebar-nav"></ul>
+    <hr class="sidebar-divider">
+    <div class="sidebar-section-label">Scoring</div>
+    <ul class="sidebar-nav">
+      <li><a href="#my-scorecard">My scorecard</a></li>
+      <li><a href="#combined-scorecard">Combined scores</a></li>
+    </ul>
+  </aside>
+
+  <main class="main">
+    <div class="candidate-card" id="candidate">
+      <div class="candidate-left">
+        <span class="field-label">Candidate name</span>
+        <input class="candidate-name-input" id="candidateName" type="text" placeholder="Type name here..." autocomplete="off" />
+        <div class="peer-edit-label" id="pel-candidateName"></div>
+      </div>
+      <div class="candidate-right">
+        <span class="outcome-label">Outcome</span>
+        <div class="outcome-buttons">
+          <button class="outcome-btn" id="btn-forward" onclick="setOutcome('forward')">Moving forward</button>
+          <button class="outcome-btn" id="btn-reject" onclick="setOutcome('reject')">Rejected</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="sections-container"></div>
+
+    <div class="scorecard-card" id="my-scorecard">
+      <div class="scorecard-header">
+        <div class="scorecard-header-title">My scorecard</div>
+        <div class="scorecard-mine-label" id="myNameLabel">private</div>
+      </div>
+      <div class="scorecard-body">
+        <div id="score-rows"></div>
+        <div class="score-total-row">
+          <span class="total-num" id="totalNum">0</span>
+          <span class="total-denom">/ 35</span>
+          <div class="progress-outer"><div class="progress-inner" id="progressBar"></div></div>
+        </div>
+        <div class="rec-section">
+          <span class="rec-label">My recommendation</span>
+          <div class="rec-buttons" id="rec-buttons"></div>
+          <span class="rec-label" style="margin-top:0.75rem;">My summary notes</span>
+          <textarea class="summary-textarea" id="summaryNotes" placeholder="Your observations, standout moments, any concerns..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="combined-card" id="combined-scorecard">
+      <div class="combined-header">
+        <div class="combined-title">Combined scores</div>
+        <div class="combined-subtitle" id="combinedSubtitle">Waiting for reviewers</div>
+      </div>
+      <div class="combined-body">
+        <div id="combined-rows"></div>
+        <div class="combined-total-row">
+          <span class="combined-total-num" id="combinedTotal">—</span>
+          <span class="combined-total-label">/ 35 avg</span>
+        </div>
+        <div class="reviewer-scores-row" id="reviewer-chips"></div>
+        <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+          <span class="rec-label">Individual recommendations</span>
+          <div class="rec-combined-row" id="rec-combined"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+// Get your own free public key at liveblocks.io — replace the value below.
+// Free tier supports up to 50 MAU with no credit card required.
+const LIVEBLOCKS_PUBLIC_KEY = 'pk_dev_Us6ssVlT7l2t0NzfC6yMQUnDbMjFFDbVB9WVb4nAXaCQsSdi56b4QNj6wl-IsuYt';
+
+// ── ROOM / USER IDENTITY ────────────────────────────────────────────────────
+function getRoomId() {
+  let h = location.hash.slice(1);
+  if (!h) { h = 'qpd-' + Math.random().toString(36).slice(2,10); history.replaceState(null,'','#'+h); }
+  return h;
+}
+const ROOM_ID = getRoomId();
+document.getElementById('roomCodeDisplay').textContent = location.href;
+
+const AVATAR_COLORS = ['#E8001B','#3B6D11','#185FA5','#7a4a00','#993556','#0F6E56','#534AB7'];
+function colorForId(id) { let h=0; for(const c of id) h=(h*31+c.charCodeAt(0))%AVATAR_COLORS.length; return AVATAR_COLORS[h]; }
+function initials(name) { return (name||'?').trim().split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?'; }
+
+const UID_KEY = 'qpd_uid_' + ROOM_ID;
+const NAME_KEY = 'qpd_name_' + ROOM_ID;
+let myUserId = localStorage.getItem(UID_KEY) || ('u_'+Math.random().toString(36).slice(2,10));
+localStorage.setItem(UID_KEY, myUserId);
+let myUserName = localStorage.getItem(NAME_KEY) || '';
+
+// ── DATA ────────────────────────────────────────────────────────────────────
+const sections = [
+  {id:'welcome',num:'01',title:'Welcome & context',dur:'5 min',purpose:'Set expectations and help the candidate feel comfortable',
+   questions:[{q:'Set context: this is a first-round conversation focused on understanding how you work, learn, and collaborate.'},{q:'Explain role context: a mobile app delivery squad with strong collaboration across product, engineering and design.'}]},
+  {id:'background',num:'02',title:'Background & design journey',dur:'10 min',purpose:'Understand experience, motivations, and career progression',
+   questions:[{q:"Can you walk me through your career so far and how you've evolved as a product designer?"},{q:'What kinds of products or platforms have you mainly worked on?'},{q:'Looking at your last couple of roles, what do you feel you became noticeably better at?',listen:'Reflection, growth, ownership of learning'},{q:'What made this role at Qantas interesting to you?',listen:'Values alignment, curiosity, scale and customer impact'}]},
+  {id:'squad',num:'03',title:'Working in a delivery squad',dur:'10 min',purpose:'Assess collaboration, agility and delivery mindset',
+   questions:[{q:"Tell me about a typical delivery squad you've worked in. Who did you partner with day-to-day?"},{q:'How do you usually balance speed and quality in a fast-moving environment?'},{q:'Can you share a time when ways of working changed mid-project? How did you adapt?'}]},
+  {id:'learning',num:'04',title:'Learning mindset & growth',dur:'10 min',purpose:'Assess curiosity, openness to feedback and continuous improvement',
+   questions:[{q:"What's something new you've learned in the past 6–12 months that genuinely changed how you work?"},{q:"Tell me about a time you were asked to work in a way you weren't familiar with."},{q:"How do you usually seek feedback, and how do you respond when it's challenging?"}]},
+  {id:'ownership',num:'05',title:'Proactivity & ownership',dur:'10 min',purpose:'Understand initiative, accountability and ownership mindset',
+   questions:[{q:'Can you describe a time you proactively identified a problem or opportunity?'},{q:"How do you decide where to focus when priorities aren't completely clear?"},{q:'What does strong ownership look like for a mid-level product designer?'}]},
+  {id:'design',num:'06',title:'Design practice & problem solving',dur:'10 min',purpose:'Validate core design thinking and mobile experience',
+   questions:[{q:"Talk me through a mobile design problem you're proud of."},{q:'How do you usually move from an ambiguous problem to something deliverable?'},{q:'How do you think about usability and accessibility under time pressure?'}]},
+  {id:'tools',num:'07',title:'Tools, AI & experimentation',dur:'5 min',purpose:'Assess curiosity with modern tools and AI-enabled workflows',
+   questions:[{q:'How are you currently using AI or newer tools in your design workflow, if at all?'},{q:'Have you experimented with any tools recently just out of curiosity?'},{q:'Where do you think AI genuinely helps designers today?'}]},
+  {id:'culture',num:'08',title:'Culture & team fit',dur:'5 min',purpose:'Assess alignment with team and organisational values',
+   questions:[{q:'What kind of team environment helps you do your best work?'},{q:'What behaviours from teammates frustrate you, and how do you handle that constructively?'},{q:'How do you like to be supported as you grow in your role?'}]},
+  {id:'behaviour',num:'—',title:'Behaviour guide',dur:null,purpose:'These behaviours should show up naturally in conversation — not direct questions',isBehaviour:true,
+   behaviours:[
+     {title:'Customer first',points:['Talks about user impact','Considers accessibility and quality','Balances business and customer needs']},
+     {title:'Care & safety',points:['Thoughtful decision-making','Attention to quality','Considers risk and impact']},
+     {title:'Curiosity & learning',points:['Seeks feedback','Experiments with tools or approaches','Reflects on mistakes']},
+     {title:'Collaboration',points:['Speaks positively about cross-functional work','Resolves tension constructively','Shares credit']},
+     {title:'Ownership & pride',points:['Takes accountability','Follows through','Cares about outcomes, not just outputs']}]},
+  {id:'candidate-qs',num:'—',title:'Candidate questions',dur:'Open',purpose:'Listen for curiosity, thoughtfulness, long-term interest',
+   questions:[{q:"That's everything from us for now. What questions do you have about the role, the team, or how we work?"}]}
+];
+
+const scoreAreas = ['Learning mindset','Proactivity & ownership','Collaboration','Design & problem solving','Adaptability','Tool & AI curiosity','Overall culture fit'];
+const myScores = {}; scoreAreas.forEach(a => myScores[a] = 0);
+const recs = [{label:'Strong yes',cls:'sel-sy',key:'sy'},{label:'Yes',cls:'sel-y',key:'y'},{label:'Leaning yes',cls:'sel-ly',key:'ly'},{label:'Leaning no',cls:'sel-ln',key:'ln'},{label:'No',cls:'sel-n',key:'n'}];
+let selRec = null;
+let currentOutcome = null;
+
+// ── BUILD UI ─────────────────────────────────────────────────────────────────
+const nav = document.getElementById('sidebar-nav');
+sections.forEach(sec => { const li=document.createElement('li'),a=document.createElement('a'); a.href='#'+sec.id; a.textContent=sec.title; li.appendChild(a); nav.appendChild(li); });
+
+const container = document.getElementById('sections-container');
+sections.forEach(sec => {
+  const card=document.createElement('div'); card.className='section-card'; card.id=sec.id;
+  let body=`<div class="purpose-pill">${sec.purpose}</div>`;
+  if(sec.isBehaviour){
+    body+=`<div class="behaviour-grid">`;
+    sec.behaviours.forEach(b=>{ body+=`<div class="behaviour-item"><div class="behaviour-title">${b.title}</div>`; b.points.forEach(p=>{body+=`<div class="behaviour-point">· ${p}</div>`;});body+=`</div>`; });
+    body+=`</div>`;
+  } else {
+    sec.questions.forEach((q,qi)=>{
+      if(qi>0)body+=`<hr class="q-divider">`;
+      const tid='notes-'+sec.id+'-'+qi;
+      body+=`<div class="q-block"><div class="q-text">${q.q}</div>`;
+      if(q.listen)body+=`<div class="q-listen"><strong>Listen for:</strong> ${q.listen}</div>`;
+      body+=`<textarea class="q-notes" id="${tid}" placeholder="Notes..."></textarea><div class="peer-edit-label" id="pel-${tid}"></div></div>`;
+    });
+  }
+  card.innerHTML=`<div class="section-header" onclick="toggleSection('${sec.id}')"><div class="section-header-left"><span class="section-num">${sec.num}</span><span class="section-name">${sec.title}</span>${sec.dur?`<span class="section-dur">${sec.dur}</span>`:''}</div><span class="section-chevron" id="chev-${sec.id}">▼</span></div><div class="section-body" id="body-${sec.id}">${body}</div>`;
+  container.appendChild(card);
+});
+
+const scoreRowsEl=document.getElementById('score-rows');
+scoreAreas.forEach(area=>{
+  const safeId=area.replace(/[^a-z]/gi,'');
+  let stars=''; for(let i=1;i<=5;i++) stars+=`<button class="star-btn" data-area="${safeId}" onclick="setScore('${area}',${i})">${i}</button>`;
+  const row=document.createElement('div'); row.className='score-area-row';
+  row.innerHTML=`<div class="score-area-name">${area}</div><div class="score-stars">${stars}</div><textarea class="score-area-notes" placeholder="Notes..."></textarea>`;
+  scoreRowsEl.appendChild(row);
+});
+
+const combinedRowsEl=document.getElementById('combined-rows');
+scoreAreas.forEach(area=>{
+  const sid=area.replace(/[^a-z]/gi,'');
+  const row=document.createElement('div'); row.className='combined-row';
+  row.innerHTML=`<div class="combined-name">${area}</div><div class="combined-bar-wrap"><div class="combined-bar" id="cbar-${sid}"></div></div><div class="combined-val" id="cval-${sid}">—</div>`;
+  combinedRowsEl.appendChild(row);
+});
+
+const recBtns=document.getElementById('rec-buttons');
+recs.forEach(r=>{ const btn=document.createElement('button'); btn.className='rec-btn'; btn.dataset.key=r.key; btn.textContent=r.label; btn.onclick=()=>setRec(r.key); recBtns.appendChild(btn); });
+
+// ── LOCAL INTERACTIONS ───────────────────────────────────────────────────────
+function toggleSection(id){ document.getElementById('body-'+id).classList.toggle('open'); document.getElementById('chev-'+id).classList.toggle('open'); }
+
+function setOutcomeUI(v){ document.getElementById('btn-forward').className='outcome-btn'+(v==='forward'?' forward':''); document.getElementById('btn-reject').className='outcome-btn'+(v==='reject'?' reject':''); }
+function setOutcome(v){ currentOutcome=v; setOutcomeUI(v); setSharedField('outcome',v); }
+
+function setScore(area,val){
+  myScores[area]=val;
+  const sid=area.replace(/[^a-z]/gi,'');
+  document.querySelectorAll(`.star-btn[data-area="${sid}"]`).forEach((b,i)=>b.classList.toggle('on',i<val));
+  const total=Object.values(myScores).reduce((a,b)=>a+b,0);
+  document.getElementById('totalNum').textContent=total;
+  document.getElementById('progressBar').style.width=Math.round(total/35*100)+'%';
+  publishMyScorecard();
+}
+
+function setRec(key){
+  selRec=key;
+  document.querySelectorAll('.rec-btn').forEach(btn=>{ const r=recs.find(r=>r.key===btn.dataset.key); btn.className='rec-btn'+(btn.dataset.key===key?' '+r.cls:''); });
+  publishMyScorecard();
+}
+
+// ── LIVEBLOCKS ───────────────────────────────────────────────────────────────
+let storageRoot=null;
+let lbRoom=null;
+let isSuppressed=false;
+
+function setConnStatus(online){
+  const b=document.getElementById('connBadge'),t=document.getElementById('connText');
+  b.className='conn-badge'+(online?' online':'');
+  t.textContent=online?'Live':'Offline';
+}
+
+async function initLiveblocks(){
+  // LiveMap is the correct type for dynamic key-value storage in Liveblocks v2.
+  // Plain objects {} in initialStorage are stored as immutable JSON, not live nodes —
+  // room.subscribe({}, callback) throws and kills the rest of init silently.
+  const {createClient,LiveMap}=await import('https://esm.sh/@liveblocks/client@2.13.0');
+  const client=createClient({publicApiKey:LIVEBLOCKS_PUBLIC_KEY});
+  const {room,leave}=client.enterRoom(ROOM_ID,{
+    initialPresence:{userId:myUserId,name:myUserName,color:colorForId(myUserId),editing:null},
+    initialStorage:{sharedFields:new LiveMap(),scorecards:new LiveMap()}
+  });
+  lbRoom=room;
+
+  room.subscribe('status',s=>setConnStatus(s==='connected'));
+
+  // Subscribe to presence BEFORE awaiting storage — the initial "here are all
+  // current users" event fires during getStorage()'s await; registering here
+  // ensures the joiner doesn't miss it.
+  renderPresence([]);
+  room.subscribe('others',others=>{ renderPresence(Array.from(others)); updateCombined(); });
+
+  const {root}=await room.getStorage();
+  storageRoot=root;
+
+  // Auto-migrate any room that was initialised before this fix with plain {} storage.
+  // root.set() replaces the immutable JSON value with a proper live LiveMap.
+  let sf=root.get('sharedFields');
+  if(!sf||typeof sf.set!=='function'){ root.set('sharedFields',new LiveMap()); sf=root.get('sharedFields'); }
+  let sc=root.get('scorecards');
+  if(!sc||typeof sc.set!=='function'){ root.set('scorecards',new LiveMap()); sc=root.get('scorecards'); }
+
+  // Load existing shared fields into this client's UI
+  isSuppressed=true; applySharedFields(sfToObj(sf)); isSuppressed=false;
+
+  // Load this user's previous scorecard if it exists
+  const mine=sc.get(myUserId); if(mine) applyMyScorecard(mine);
+
+  // Subscribe to live storage changes from any client
+  room.subscribe(sf,()=>{
+    if(isSuppressed)return;
+    isSuppressed=true; applySharedFields(sfToObj(sf)); isSuppressed=false;
+  });
+  room.subscribe(sc,()=>{ updateCombined(); });
+
+  // Wire shared field inputs
+  document.getElementById('candidateName').addEventListener('input',debounce(()=>{ if(!isSuppressed)setSharedField('candidateName',document.getElementById('candidateName').value); },250));
+  document.querySelectorAll('.q-notes').forEach(el=>{
+    el.addEventListener('input',debounce(()=>{ if(!isSuppressed)setSharedField(el.id,el.value); },250));
+  });
+
+  // Wire focus/blur to broadcast which field each user is editing
+  const setEditing=id=>lbRoom.updatePresence({editing:id});
+  const clearEditing=()=>lbRoom.updatePresence({editing:null});
+  document.getElementById('candidateName').addEventListener('focus',()=>setEditing('candidateName'));
+  document.getElementById('candidateName').addEventListener('blur',clearEditing);
+  document.querySelectorAll('.q-notes').forEach(el=>{
+    el.addEventListener('focus',()=>setEditing(el.id));
+    el.addEventListener('blur',clearEditing);
+  });
+
+  // Wire private scorecard inputs
+  document.querySelectorAll('.score-area-notes').forEach(el=>el.addEventListener('input',debounce(publishMyScorecard,400)));
+  document.getElementById('summaryNotes').addEventListener('input',debounce(publishMyScorecard,400));
+
+  publishMyScorecard();
+  updateCombined();
+  setConnStatus(true);
+}
+
+function sfToObj(sf){ try{ return sf.toObject?sf.toObject():Object.fromEntries(sf); }catch(e){ return {}; } }
+
+function setSharedField(key,value){
+  if(!storageRoot)return;
+  try{ const sf=storageRoot.get('sharedFields'); if(sf&&sf.set)sf.set(key,value); }catch(e){}
+}
+
+function applySharedFields(data){
+  const nameEl=document.getElementById('candidateName');
+  if(data.candidateName!==undefined&&data.candidateName!==nameEl.value) nameEl.value=data.candidateName;
+  if(data.outcome!==undefined){ currentOutcome=data.outcome; setOutcomeUI(data.outcome); }
+  Object.keys(data).forEach(k=>{ if(k.startsWith('notes-')){ const el=document.getElementById(k); if(el&&el.value!==data[k])el.value=data[k]; } });
+}
+
+function publishMyScorecard(){
+  if(!storageRoot||!myUserName)return;
+  try{
+    const sc=storageRoot.get('scorecards'); if(!sc||!sc.set)return;
+    const scoreNotes={}; document.querySelectorAll('.score-area-notes').forEach((el,i)=>{scoreNotes[i]=el.value;});
+    sc.set(myUserId,JSON.stringify({userId:myUserId,name:myUserName,color:colorForId(myUserId),scores:{...myScores},scoreNotes,recommendation:selRec,summary:document.getElementById('summaryNotes').value}));
+    updateCombined();
+  }catch(e){}
+}
+
+function applyMyScorecard(raw){
+  try{
+    const data=typeof raw==='string'?JSON.parse(raw):raw;
+    if(data.scores)Object.entries(data.scores).forEach(([area,val])=>{if(val)setScore(area,val);});
+    if(data.scoreNotes){ const els=document.querySelectorAll('.score-area-notes'); Object.entries(data.scoreNotes).forEach(([i,val])=>{if(els[i])els[i].value=val;}); }
+    if(data.recommendation)setRec(data.recommendation);
+    if(data.summary)document.getElementById('summaryNotes').value=data.summary;
+  }catch(e){}
+}
+
+function updateCombined(){
+  if(!storageRoot)return;
+  try{
+    const sc=storageRoot.get('scorecards'); if(!sc)return;
+    const raw=sfToObj(sc);
+    const reviewers=Object.values(raw).map(v=>{ try{return typeof v==='string'?JSON.parse(v):v;}catch(e){return null;} }).filter(d=>d&&d.name&&d.scores);
+    if(!reviewers.length)return;
+    document.getElementById('combinedSubtitle').textContent=reviewers.length+' reviewer'+(reviewers.length!==1?'s':'');
+    scoreAreas.forEach(area=>{
+      const vals=reviewers.map(r=>r.scores[area]||0).filter(v=>v>0);
+      const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;
+      const sid=area.replace(/[^a-z]/gi,'');
+      const bar=document.getElementById('cbar-'+sid),val=document.getElementById('cval-'+sid);
+      if(bar)bar.style.width=Math.round(avg/5*100)+'%';
+      if(val)val.textContent=avg?avg.toFixed(1):'—';
+    });
+    const totals=reviewers.map(r=>Object.values(r.scores).reduce((a,b)=>a+b,0));
+    const avgTotal=totals.length?totals.reduce((a,b)=>a+b,0)/totals.length:0;
+    document.getElementById('combinedTotal').textContent=avgTotal?avgTotal.toFixed(1):'—';
+    const chips=document.getElementById('reviewer-chips'); chips.innerHTML='';
+    reviewers.forEach(r=>{ const t=Object.values(r.scores).reduce((a,b)=>a+b,0); chips.innerHTML+=`<div class="reviewer-chip"><div class="reviewer-dot" style="background:${r.color||'#888'}"></div><span class="reviewer-name-chip">${r.name}</span><span class="reviewer-score-chip">${t}/35</span></div>`; });
+    const recEl=document.getElementById('rec-combined'); recEl.innerHTML='';
+    reviewers.forEach(r=>{ if(!r.recommendation)return; const label=recs.find(x=>x.key===r.recommendation)?.label||r.recommendation; recEl.innerHTML+=`<div class="rec-combined-item"><strong>${r.name}:</strong> ${label}</div>`; });
+  }catch(e){}
+}
+
+function renderPresence(others){
+  const row=document.getElementById('presenceRow');
+  row.innerHTML=`<div class="avatar self" style="background:${colorForId(myUserId)}">${initials(myUserName)}<span class="avatar-tip">${myUserName||'You'} (you)</span></div>`;
+
+  // Reset all peer-editing indicators
+  document.querySelectorAll('.peer-edit-label').forEach(el=>{el.style.display='none';});
+  document.querySelectorAll('.peer-editing').forEach(el=>{el.classList.remove('peer-editing');el.style.removeProperty('--peer-color');el.style.removeProperty('border-color');el.style.removeProperty('border-bottom-color');});
+
+  (others||[]).forEach(o=>{
+    const p=o.presence||{}; if(!p.name)return;
+    row.innerHTML+=`<div class="avatar" style="background:${p.color||colorForId(p.userId||'x')}">${initials(p.name)}<span class="avatar-tip">${p.name}</span></div>`;
+    if(p.editing){
+      const lbl=document.getElementById('pel-'+p.editing);
+      if(lbl){lbl.textContent=p.name+' is typing\u2026';lbl.style.background=p.color||'#888';lbl.style.display='block';}
+      const fld=document.getElementById(p.editing);
+      if(fld){fld.classList.add('peer-editing');fld.style.setProperty('--peer-color',p.color||'#888');fld.style.borderColor=p.color||'#888';}
+    }
+  });
+}
+
+// ── JOIN / MODAL ─────────────────────────────────────────────────────────────
+function joinSession(){
+  const n=document.getElementById('userNameInput').value.trim();
+  if(!n){document.getElementById('userNameInput').focus();return;}
+  myUserName=n;
+  localStorage.setItem(NAME_KEY,n);
+  document.getElementById('joinModal').classList.add('hidden');
+  document.getElementById('myNameLabel').textContent=n;
+  initLiveblocks();
+}
+document.getElementById('userNameInput').addEventListener('keydown',e=>{if(e.key==='Enter')joinSession();});
+
+if(myUserName){
+  document.getElementById('joinModal').classList.add('hidden');
+  document.getElementById('myNameLabel').textContent=myUserName;
+  initLiveblocks();
+}
+
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+
+function copyLink(){ navigator.clipboard.writeText(location.href).then(()=>showToast('Link copied!')).catch(()=>prompt('Copy this link:',location.href)); }
+
+function saveToFile(){
+  const state={candidateName:document.getElementById('candidateName').value,outcome:currentOutcome,notes:{},myScores:{...myScores},recommendation:selRec,summary:document.getElementById('summaryNotes').value,roomId:ROOM_ID};
+  document.querySelectorAll('.q-notes').forEach(el=>{state.notes[el.id]=el.value;});
+  const name=state.candidateName?state.candidateName.replace(/\s+/g,'_'):'interview';
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name+'_interview.json'; a.click(); URL.revokeObjectURL(a.href);
+  showToast('File downloaded');
+}
+
+function showToast(msg){const t=document.getElementById('saveToast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+
+// ── SCROLL SPY ───────────────────────────────────────────────────────────────
+const allIds=[...sections.map(s=>s.id),'my-scorecard','combined-scorecard'];
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));});},{threshold:0.2});
+allIds.forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el);});
+</script>
+</body>
+</html>
