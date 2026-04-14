@@ -151,6 +151,37 @@
   .rec-btn.sel-ln { background: #fff3ec; color: #8a3a00; border-color: #e07a3a; font-weight: 500; }
   .rec-btn.sel-n  { background: var(--reject-bg); color: var(--reject-text); border-color: var(--reject-border); font-weight: 500; }
 
+  /* CANDIDATE LIST */
+  .sidebar-back-btn { display:flex; align-items:center; gap:5px; margin:0.75rem 1rem 0.25rem; padding:7px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.12); background:transparent; color:rgba(255,255,255,0.5); font-family:'DM Sans',sans-serif; font-size:12px; cursor:pointer; width:calc(100% - 2rem); transition:all 0.15s; }
+  .sidebar-back-btn:hover { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.85); }
+  .sidebar-new-btn { padding:2px 8px; border-radius:4px; border:1px solid rgba(255,255,255,0.2); background:rgba(232,0,27,0.18); color:rgba(255,255,255,0.7); font-family:'DM Mono',monospace; font-size:10px; cursor:pointer; transition:all 0.15s; }
+  .sidebar-new-btn:hover { background:var(--red); color:#fff; }
+  .candidate-list-item { display:block; padding:9px 1.5rem; cursor:pointer; transition:background 0.15s; border-left:2px solid transparent; }
+  .candidate-list-item:hover { background:rgba(255,255,255,0.05); }
+  .candidate-list-item.active { border-left-color:var(--red); background:rgba(232,0,27,0.08); }
+  .cli-name { font-size:12px; color:rgba(255,255,255,0.8); font-weight:500; margin-bottom:2px; }
+  .cli-meta { display:flex; align-items:center; gap:6px; }
+  .cli-date { font-size:10px; font-family:'DM Mono',monospace; color:rgba(255,255,255,0.3); }
+  .cli-outcome { font-size:9px; font-family:'DM Mono',monospace; padding:1px 5px; border-radius:3px; }
+  .cli-outcome.forward { background:rgba(110,201,138,0.2); color:#6ec98a; }
+  .cli-outcome.reject { background:rgba(232,0,27,0.2); color:#ff6b80; }
+  .sidebar-empty { padding:1.5rem; font-size:11px; color:rgba(255,255,255,0.25); font-family:'DM Mono',monospace; line-height:1.7; }
+
+  /* AI SUMMARY */
+  .ai-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:1rem; overflow:hidden; scroll-margin-top:70px; }
+  .ai-header { padding:1rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; background:#fafaf9; }
+  .ai-title { font-size:14px; font-weight:500; color:var(--ink); }
+  .ai-body { padding:1.25rem; }
+  .ai-hint { font-size:11px; color:var(--ink3); font-family:'DM Mono',monospace; margin-bottom:0.9rem; line-height:1.6; }
+  .ai-key-row { display:flex; gap:8px; margin-bottom:0.9rem; }
+  .ai-key-input { flex:1; font-family:'DM Mono',monospace; font-size:12px; border:1px solid var(--border-strong); border-radius:6px; padding:8px 10px; background:var(--bg); outline:none; color:var(--ink); min-width:0; }
+  .ai-key-input:focus { border-color:rgba(232,0,27,0.4); background:#fff; }
+  .ai-generate-btn { padding:8px 16px; border-radius:6px; border:none; background:var(--ink); color:#fff; font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; white-space:nowrap; transition:background 0.15s; }
+  .ai-generate-btn:hover { background:#333; }
+  .ai-generate-btn:disabled { opacity:0.5; cursor:not-allowed; }
+  .ai-result { width:100%; font-family:'DM Sans',sans-serif; font-size:13px; color:var(--ink); border:1px solid var(--border); border-radius:6px; padding:10px 12px; background:var(--bg); outline:none; resize:vertical; min-height:130px; line-height:1.6; }
+  .ai-result:focus { border-color:rgba(232,0,27,0.4); background:#fff; }
+
   /* PEER EDITING */
   .peer-edit-label { font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 8px 3px; border-radius: 0 0 4px 4px; color: #fff; display: none; margin-top: -2px; }
   .q-notes.peer-editing { border-color: var(--peer-color) !important; background: #fff !important; }
@@ -233,17 +264,30 @@
 
 <div class="layout">
   <aside class="sidebar">
-    <div class="sidebar-section-label">Interview</div>
-    <ul class="sidebar-nav" id="sidebar-nav"></ul>
-    <hr class="sidebar-divider">
-    <div class="sidebar-section-label">Scoring</div>
-    <ul class="sidebar-nav">
-      <li><a href="#my-scorecard">My scorecard</a></li>
-      <li><a href="#combined-scorecard">Combined scores</a></li>
-    </ul>
+    <div id="sidebar-candidates">
+      <div class="sidebar-section-label" style="display:flex;align-items:center;justify-content:space-between;padding-right:1rem;">Candidates<button class="sidebar-new-btn" onclick="newCandidate()">+ New</button></div>
+      <ul class="sidebar-nav" id="candidate-list"></ul>
+    </div>
+    <div id="sidebar-interview" style="display:none;">
+      <button class="sidebar-back-btn" onclick="backToCandidates()">← All candidates</button>
+      <div class="sidebar-section-label">Interview</div>
+      <ul class="sidebar-nav" id="sidebar-nav"></ul>
+      <hr class="sidebar-divider">
+      <div class="sidebar-section-label">Scoring</div>
+      <ul class="sidebar-nav">
+        <li><a href="#my-scorecard">My scorecard</a></li>
+        <li><a href="#combined-scorecard">Combined scores</a></li>
+        <li><a href="#ai-summary">AI summary</a></li>
+      </ul>
+    </div>
   </aside>
 
   <main class="main">
+    <div id="no-candidate-state" style="display:none;flex-direction:column;align-items:center;justify-content:center;padding:5rem 2rem;text-align:center;">
+      <div style="font-size:15px;font-weight:500;color:var(--ink2);margin-bottom:8px;">No candidate selected</div>
+      <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--ink3);line-height:1.7;">Select a candidate from the sidebar<br>or click <strong>+ New</strong> to start a new interview.</div>
+    </div>
+    <div id="main-interview-content">
     <div class="candidate-card" id="candidate">
       <div class="candidate-left">
         <span class="field-label">Candidate name</span>
@@ -300,13 +344,28 @@
         </div>
       </div>
     </div>
+
+    <div class="ai-card" id="ai-summary">
+      <div class="ai-header">
+        <div class="ai-title">AI interview summary</div>
+        <span class="scorecard-mine-label">OpenAI GPT-4o</span>
+      </div>
+      <div class="ai-body">
+        <p class="ai-hint">Summarises all interview notes and scores using GPT-4o. Your API key is stored locally only and never sent anywhere except OpenAI.</p>
+        <div class="ai-key-row">
+          <input class="ai-key-input" id="aiKeyInput" type="password" placeholder="sk-... OpenAI API key" autocomplete="off" />
+          <button class="ai-generate-btn" id="aiGenerateBtn" onclick="generateAISummary()">Generate summary</button>
+        </div>
+        <textarea class="ai-result" id="aiResult" placeholder="Summary will appear here…" readonly></textarea>
+      </div>
+    </div>
+
+    </div><!-- /main-interview-content -->
   </main>
 </div>
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────────────────────────
-// Get your own free public key at liveblocks.io — replace the value below.
-// Free tier supports up to 50 MAU with no credit card required.
 const LIVEBLOCKS_PUBLIC_KEY = 'pk_dev_Us6ssVlT7l2t0NzfC6yMQUnDbMjFFDbVB9WVb4nAXaCQsSdi56b4QNj6wl-IsuYt';
 
 // ── ROOM / USER IDENTITY ────────────────────────────────────────────────────
@@ -362,6 +421,9 @@ const myScores = {}; scoreAreas.forEach(a => myScores[a] = 0);
 const recs = [{label:'Strong yes',cls:'sel-sy',key:'sy'},{label:'Yes',cls:'sel-y',key:'y'},{label:'Leaning yes',cls:'sel-ly',key:'ly'},{label:'Leaning no',cls:'sel-ln',key:'ln'},{label:'No',cls:'sel-n',key:'n'}];
 let selRec = null;
 let currentOutcome = null;
+let activeCandidateId = null;
+let candidatesCache = {};
+let inputListenersWired = false;
 
 // ── BUILD UI ─────────────────────────────────────────────────────────────────
 const nav = document.getElementById('sidebar-nav');
@@ -430,6 +492,137 @@ function setRec(key){
   publishMyScorecard();
 }
 
+// ── CANDIDATE MANAGEMENT ─────────────────────────────────────────────────────
+function newCandidate(){
+  if(!storageRoot)return;
+  const cid='cand-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+  const meta={id:cid,name:'',outcome:null,createdAt:Date.now()};
+  const cm=storageRoot.get('candidates');
+  if(cm&&cm.set)cm.set(cid,JSON.stringify(meta));
+  selectCandidate(cid);
+}
+
+function selectCandidate(cid){
+  if(!storageRoot)return;
+  try{ const sess=storageRoot.get('session'); if(sess&&sess.set)sess.set('activeCandidate',cid); }catch(e){}
+  switchCandidateLocal(cid);
+}
+
+function switchCandidateLocal(cid){
+  activeCandidateId=cid;
+  clearInterviewUI();
+  if(storageRoot){
+    const fl=storageRoot.get('fields');
+    const sc=storageRoot.get('scorecards');
+    const data=getCandidateFields(fl,cid);
+    isSuppressed=true; applySharedFields(data); isSuppressed=false;
+    const mine=sc?sc.get(myUserId+':'+cid):null;
+    if(mine)applyMyScorecard(mine); else resetMyScorecard();
+  }
+  showInterviewPanel();
+  renderCandidateList();
+  updateCombined();
+  wireInputListeners();
+}
+
+function clearInterviewUI(){
+  document.getElementById('candidateName').value='';
+  currentOutcome=null; setOutcomeUI(null);
+  document.querySelectorAll('.q-notes').forEach(el=>el.value='');
+}
+
+function resetMyScorecard(){
+  scoreAreas.forEach(a=>{
+    myScores[a]=0;
+    const sid=a.replace(/[^a-z]/gi,'');
+    document.querySelectorAll(`.star-btn[data-area="${sid}"]`).forEach(b=>b.classList.remove('on'));
+  });
+  document.querySelectorAll('.score-area-notes').forEach(el=>el.value='');
+  document.getElementById('summaryNotes').value='';
+  selRec=null;
+  document.querySelectorAll('.rec-btn').forEach(b=>{b.className='rec-btn';});
+  document.getElementById('totalNum').textContent='0';
+  document.getElementById('progressBar').style.width='0%';
+}
+
+function showInterviewPanel(){
+  document.getElementById('sidebar-candidates').style.display='none';
+  document.getElementById('sidebar-interview').style.display='block';
+  document.getElementById('no-candidate-state').style.display='none';
+  document.getElementById('main-interview-content').style.display='block';
+}
+
+function showCandidateListPanel(){
+  activeCandidateId=null;
+  document.getElementById('sidebar-candidates').style.display='block';
+  document.getElementById('sidebar-interview').style.display='none';
+  document.getElementById('no-candidate-state').style.display='flex';
+  document.getElementById('main-interview-content').style.display='none';
+  renderCandidateList();
+}
+
+function backToCandidates(){
+  if(storageRoot){ try{ const sess=storageRoot.get('session'); if(sess&&sess.set)sess.set('activeCandidate',null); }catch(e){} }
+  showCandidateListPanel();
+}
+
+function getCandidateFields(fl,cid){
+  const obj={};
+  if(!fl||!cid)return obj;
+  try{
+    const all=sfToObj(fl);
+    const prefix=cid+':';
+    Object.entries(all).forEach(([k,v])=>{ if(k.startsWith(prefix))obj[k.slice(prefix.length)]=v; });
+  }catch(e){}
+  return obj;
+}
+
+function refreshCandidateList(cm){
+  candidatesCache={};
+  if(!cm)return;
+  const items=sfToObj(cm);
+  Object.values(items).forEach(v=>{
+    try{ const meta=typeof v==='string'?JSON.parse(v):v; if(meta&&meta.id)candidatesCache[meta.id]=meta; }catch(e){}
+  });
+  renderCandidateList();
+}
+
+function renderCandidateList(){
+  const ul=document.getElementById('candidate-list');
+  const sorted=Object.values(candidatesCache).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(!sorted.length){
+    ul.innerHTML='<li><div class="sidebar-empty">No candidates yet.<br>Click + New to start.</div></li>';
+    return;
+  }
+  ul.innerHTML='';
+  sorted.forEach(c=>{
+    const li=document.createElement('li');
+    const outcomeHtml=c.outcome?`<span class="cli-outcome ${c.outcome}">${c.outcome==='forward'?'Fwd':'Rejected'}</span>`:'';
+    const date=c.createdAt?new Date(c.createdAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}):'';
+    li.innerHTML=`<div class="candidate-list-item${activeCandidateId===c.id?' active':''}" onclick="selectCandidate('${c.id}')"><div class="cli-name">${c.name||'Unnamed candidate'}</div><div class="cli-meta"><span class="cli-date">${date}</span>${outcomeHtml}</div></div>`;
+    ul.appendChild(li);
+  });
+}
+
+function wireInputListeners(){
+  if(inputListenersWired)return;
+  inputListenersWired=true;
+  document.getElementById('candidateName').addEventListener('input',debounce(()=>{ if(!isSuppressed)setSharedField('candidateName',document.getElementById('candidateName').value); },250));
+  document.querySelectorAll('.q-notes').forEach(el=>{
+    el.addEventListener('input',debounce(()=>{ if(!isSuppressed)setSharedField(el.id,el.value); },250));
+  });
+  const setEditing=id=>lbRoom&&lbRoom.updatePresence({editing:id});
+  const clearEditing=()=>lbRoom&&lbRoom.updatePresence({editing:null});
+  document.getElementById('candidateName').addEventListener('focus',()=>setEditing('candidateName'));
+  document.getElementById('candidateName').addEventListener('blur',clearEditing);
+  document.querySelectorAll('.q-notes').forEach(el=>{
+    el.addEventListener('focus',()=>setEditing(el.id));
+    el.addEventListener('blur',clearEditing);
+  });
+  document.querySelectorAll('.score-area-notes').forEach(el=>el.addEventListener('input',debounce(publishMyScorecard,400)));
+  document.getElementById('summaryNotes').addEventListener('input',debounce(publishMyScorecard,400));
+}
+
 // ── LIVEBLOCKS ───────────────────────────────────────────────────────────────
 let storageRoot=null;
 let lbRoom=null;
@@ -442,68 +635,71 @@ function setConnStatus(online){
 }
 
 async function initLiveblocks(){
-  // LiveMap is the correct type for dynamic key-value storage in Liveblocks v2.
-  // Plain objects {} in initialStorage are stored as immutable JSON, not live nodes —
-  // room.subscribe({}, callback) throws and kills the rest of init silently.
-  const {createClient,LiveMap}=await import('https://esm.sh/@liveblocks/client@2.13.0');
+  const {createClient,LiveMap,LiveObject}=await import('https://esm.sh/@liveblocks/client@2.13.0');
   const client=createClient({publicApiKey:LIVEBLOCKS_PUBLIC_KEY});
   const {room,leave}=client.enterRoom(ROOM_ID,{
     initialPresence:{userId:myUserId,name:myUserName,color:colorForId(myUserId),editing:null},
-    initialStorage:{sharedFields:new LiveMap(),scorecards:new LiveMap()}
+    initialStorage:{candidates:new LiveMap(),fields:new LiveMap(),scorecards:new LiveMap(),session:new LiveObject({activeCandidate:null})}
   });
   lbRoom=room;
 
   room.subscribe('status',s=>setConnStatus(s==='connected'));
-
-  // Subscribe to presence BEFORE awaiting storage — the initial "here are all
-  // current users" event fires during getStorage()'s await; registering here
-  // ensures the joiner doesn't miss it.
   renderPresence([]);
   room.subscribe('others',others=>{ renderPresence(Array.from(others)); updateCombined(); });
 
   const {root}=await room.getStorage();
   storageRoot=root;
 
-  // Auto-migrate any room that was initialised before this fix with plain {} storage.
-  // root.set() replaces the immutable JSON value with a proper live LiveMap.
-  let sf=root.get('sharedFields');
-  if(!sf||typeof sf.set!=='function'){ root.set('sharedFields',new LiveMap()); sf=root.get('sharedFields'); }
+  // Ensure all root keys are proper live nodes
+  let cm=root.get('candidates');
+  if(!cm||typeof cm.set!=='function'){ root.set('candidates',new LiveMap()); cm=root.get('candidates'); }
+  let fl=root.get('fields');
+  if(!fl||typeof fl.set!=='function'){ root.set('fields',new LiveMap()); fl=root.get('fields'); }
   let sc=root.get('scorecards');
   if(!sc||typeof sc.set!=='function'){ root.set('scorecards',new LiveMap()); sc=root.get('scorecards'); }
+  let sess=root.get('session');
+  if(!sess||typeof sess.get!=='function'){ root.set('session',new LiveObject({activeCandidate:null})); sess=root.get('session'); }
 
-  // Load existing shared fields into this client's UI
-  isSuppressed=true; applySharedFields(sfToObj(sf)); isSuppressed=false;
+  // Migrate old sharedFields rooms: move data into first candidate
+  const oldSF=root.get('sharedFields');
+  if(oldSF&&typeof oldSF.set==='function'){
+    const oldData=sfToObj(oldSF);
+    const hasData=Object.values(oldData).some(v=>v);
+    if(hasData&&!Object.keys(sfToObj(cm)).length){
+      const oldCid='migrated-'+Date.now();
+      const oldMeta={id:oldCid,name:oldData.candidateName||'Imported',outcome:oldData.outcome||null,createdAt:Date.now()};
+      cm.set(oldCid,JSON.stringify(oldMeta));
+      Object.entries(oldData).forEach(([k,v])=>{ if(v)fl.set(oldCid+':'+k,v); });
+      root.set('sharedFields',new LiveMap());
+    }
+  }
 
-  // Load this user's previous scorecard if it exists
-  const mine=sc.get(myUserId); if(mine) applyMyScorecard(mine);
+  refreshCandidateList(cm);
 
-  // Subscribe to live storage changes from any client
-  room.subscribe(sf,()=>{
-    if(isSuppressed)return;
-    isSuppressed=true; applySharedFields(sfToObj(sf)); isSuppressed=false;
+  const activeCid=sess.get('activeCandidate');
+  if(activeCid&&cm.get(activeCid)) switchCandidateLocal(activeCid);
+  else showCandidateListPanel();
+
+  room.subscribe(cm,()=>refreshCandidateList(storageRoot.get('candidates')));
+
+  room.subscribe(fl,()=>{
+    if(isSuppressed||!activeCandidateId)return;
+    isSuppressed=true;
+    applySharedFields(getCandidateFields(storageRoot.get('fields'),activeCandidateId));
+    isSuppressed=false;
   });
-  room.subscribe(sc,()=>{ updateCombined(); });
 
-  // Wire shared field inputs
-  document.getElementById('candidateName').addEventListener('input',debounce(()=>{ if(!isSuppressed)setSharedField('candidateName',document.getElementById('candidateName').value); },250));
-  document.querySelectorAll('.q-notes').forEach(el=>{
-    el.addEventListener('input',debounce(()=>{ if(!isSuppressed)setSharedField(el.id,el.value); },250));
+  room.subscribe(sc,()=>updateCombined());
+
+  room.subscribe(sess,()=>{
+    const newCid=storageRoot.get('session').get('activeCandidate');
+    if(newCid===activeCandidateId)return;
+    const cm3=storageRoot.get('candidates');
+    if(newCid&&cm3.get(newCid)) switchCandidateLocal(newCid);
+    else showCandidateListPanel();
   });
 
-  // Wire focus/blur to broadcast which field each user is editing
-  const setEditing=id=>lbRoom.updatePresence({editing:id});
-  const clearEditing=()=>lbRoom.updatePresence({editing:null});
-  document.getElementById('candidateName').addEventListener('focus',()=>setEditing('candidateName'));
-  document.getElementById('candidateName').addEventListener('blur',clearEditing);
-  document.querySelectorAll('.q-notes').forEach(el=>{
-    el.addEventListener('focus',()=>setEditing(el.id));
-    el.addEventListener('blur',clearEditing);
-  });
-
-  // Wire private scorecard inputs
-  document.querySelectorAll('.score-area-notes').forEach(el=>el.addEventListener('input',debounce(publishMyScorecard,400)));
-  document.getElementById('summaryNotes').addEventListener('input',debounce(publishMyScorecard,400));
-
+  wireInputListeners();
   publishMyScorecard();
   updateCombined();
   setConnStatus(true);
@@ -512,8 +708,16 @@ async function initLiveblocks(){
 function sfToObj(sf){ try{ return sf.toObject?sf.toObject():Object.fromEntries(sf); }catch(e){ return {}; } }
 
 function setSharedField(key,value){
-  if(!storageRoot)return;
-  try{ const sf=storageRoot.get('sharedFields'); if(sf&&sf.set)sf.set(key,value); }catch(e){}
+  if(!storageRoot||!activeCandidateId)return;
+  try{
+    const fl=storageRoot.get('fields');
+    if(fl&&fl.set) fl.set(activeCandidateId+':'+key,value);
+    if(key==='candidateName'||key==='outcome'){
+      const cm=storageRoot.get('candidates');
+      const existing=cm&&cm.get(activeCandidateId);
+      if(existing){ try{ const meta=JSON.parse(existing); if(key==='candidateName')meta.name=value; else meta.outcome=value; cm.set(activeCandidateId,JSON.stringify(meta)); }catch(e){} }
+    }
+  }catch(e){}
 }
 
 function applySharedFields(data){
@@ -524,11 +728,11 @@ function applySharedFields(data){
 }
 
 function publishMyScorecard(){
-  if(!storageRoot||!myUserName)return;
+  if(!storageRoot||!myUserName||!activeCandidateId)return;
   try{
     const sc=storageRoot.get('scorecards'); if(!sc||!sc.set)return;
     const scoreNotes={}; document.querySelectorAll('.score-area-notes').forEach((el,i)=>{scoreNotes[i]=el.value;});
-    sc.set(myUserId,JSON.stringify({userId:myUserId,name:myUserName,color:colorForId(myUserId),scores:{...myScores},scoreNotes,recommendation:selRec,summary:document.getElementById('summaryNotes').value}));
+    sc.set(myUserId+':'+activeCandidateId,JSON.stringify({userId:myUserId,name:myUserName,color:colorForId(myUserId),scores:{...myScores},scoreNotes,recommendation:selRec,summary:document.getElementById('summaryNotes').value}));
     updateCombined();
   }catch(e){}
 }
@@ -544,11 +748,12 @@ function applyMyScorecard(raw){
 }
 
 function updateCombined(){
-  if(!storageRoot)return;
+  if(!storageRoot||!activeCandidateId)return;
   try{
     const sc=storageRoot.get('scorecards'); if(!sc)return;
-    const raw=sfToObj(sc);
-    const reviewers=Object.values(raw).map(v=>{ try{return typeof v==='string'?JSON.parse(v):v;}catch(e){return null;} }).filter(d=>d&&d.name&&d.scores);
+    const all=sfToObj(sc);
+    const suffix=':'+activeCandidateId;
+    const reviewers=Object.entries(all).filter(([k])=>k.endsWith(suffix)).map(([,v])=>{ try{return typeof v==='string'?JSON.parse(v):v;}catch(e){return null;} }).filter(d=>d&&d.name&&d.scores);
     if(!reviewers.length)return;
     document.getElementById('combinedSubtitle').textContent=reviewers.length+' reviewer'+(reviewers.length!==1?'s':'');
     scoreAreas.forEach(area=>{
@@ -572,11 +777,8 @@ function updateCombined(){
 function renderPresence(others){
   const row=document.getElementById('presenceRow');
   row.innerHTML=`<div class="avatar self" style="background:${colorForId(myUserId)}">${initials(myUserName)}<span class="avatar-tip">${myUserName||'You'} (you)</span></div>`;
-
-  // Reset all peer-editing indicators
   document.querySelectorAll('.peer-edit-label').forEach(el=>{el.style.display='none';});
   document.querySelectorAll('.peer-editing').forEach(el=>{el.classList.remove('peer-editing');el.style.removeProperty('--peer-color');el.style.removeProperty('border-color');el.style.removeProperty('border-bottom-color');});
-
   (others||[]).forEach(o=>{
     const p=o.presence||{}; if(!p.name)return;
     row.innerHTML+=`<div class="avatar" style="background:${p.color||colorForId(p.userId||'x')}">${initials(p.name)}<span class="avatar-tip">${p.name}</span></div>`;
@@ -587,6 +789,56 @@ function renderPresence(others){
       if(fld){fld.classList.add('peer-editing');fld.style.setProperty('--peer-color',p.color||'#888');fld.style.borderColor=p.color||'#888';}
     }
   });
+}
+
+// ── AI SUMMARY ────────────────────────────────────────────────────────────────
+const AI_KEY_STORAGE='qpd_openai_key';
+
+function getInterviewContext(){
+  const name=document.getElementById('candidateName').value||'Unknown candidate';
+  let ctx=`Interview notes for: ${name}\n\n`;
+  sections.forEach(sec=>{
+    if(sec.isBehaviour)return;
+    let secNotes='';
+    sec.questions.forEach((q,qi)=>{
+      const el=document.getElementById('notes-'+sec.id+'-'+qi);
+      if(el&&el.value.trim()) secNotes+=`Q: ${q.q}\nNotes: ${el.value.trim()}\n\n`;
+    });
+    if(secNotes) ctx+=`## ${sec.title}\n${secNotes}`;
+  });
+  ctx+='\n## Scores\n';
+  scoreAreas.forEach(a=>{ ctx+=`${a}: ${myScores[a]||0}/5\n`; });
+  const sum=document.getElementById('summaryNotes').value;
+  if(sum) ctx+=`\nMy summary notes: ${sum}`;
+  return ctx;
+}
+
+async function generateAISummary(){
+  const btn=document.getElementById('aiGenerateBtn');
+  const resultEl=document.getElementById('aiResult');
+  let apiKey=document.getElementById('aiKeyInput').value.trim()||localStorage.getItem(AI_KEY_STORAGE);
+  if(!apiKey){ resultEl.value='Please enter your OpenAI API key above.'; return; }
+  localStorage.setItem(AI_KEY_STORAGE,apiKey);
+  document.getElementById('aiKeyInput').value=apiKey;
+  btn.disabled=true; btn.textContent='Generating\u2026'; resultEl.value='';
+  try{
+    const resp=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+      body:JSON.stringify({
+        model:'gpt-4o',
+        messages:[
+          {role:'system',content:'You are an expert hiring assistant. Summarise interview notes into a structured assessment. Format: 3-4 sentence overview paragraph, then three bullet-point sections labelled Key strengths, Concerns or gaps, and Recommendation.'},
+          {role:'user',content:`Please summarise these interview notes:\n\n${getInterviewContext()}`}
+        ],
+        max_tokens:600,temperature:0.3
+      })
+    });
+    if(!resp.ok){ const err=await resp.json(); resultEl.value='Error: '+(err.error?.message||resp.statusText); return; }
+    const data=await resp.json();
+    resultEl.value=data.choices[0].message.content;
+  }catch(e){ resultEl.value='Error: '+e.message; }
+  finally{ btn.disabled=false; btn.textContent='Generate summary'; }
 }
 
 // ── JOIN / MODAL ─────────────────────────────────────────────────────────────
@@ -624,9 +876,13 @@ function saveToFile(){
 function showToast(msg){const t=document.getElementById('saveToast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
 // ── SCROLL SPY ───────────────────────────────────────────────────────────────
-const allIds=[...sections.map(s=>s.id),'my-scorecard','combined-scorecard'];
+const allIds=[...sections.map(s=>s.id),'my-scorecard','combined-scorecard','ai-summary'];
 const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));});},{threshold:0.2});
 allIds.forEach(id=>{const el=document.getElementById(id);if(el)obs.observe(el);});
+
+// Load saved AI key
+const savedAiKey=localStorage.getItem(AI_KEY_STORAGE);
+if(savedAiKey)document.getElementById('aiKeyInput').value=savedAiKey;
 </script>
 </body>
 </html>
